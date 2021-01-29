@@ -1,3 +1,4 @@
 *.docx
 *.pptx
 *.csv
+.DS_Store
