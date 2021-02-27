@@ -1,9 +1,9 @@
 import numpy as np
 from numpy import array
-from keras.models import Sequential
-from keras.layers import LSTM
-from keras.layers import Dense
-from keras.layers import Bidirectional
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Bidirectional
 import pandas as pd
 import matplotlib.pyplot as plt
 
