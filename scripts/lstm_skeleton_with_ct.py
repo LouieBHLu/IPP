@@ -53,7 +53,9 @@ def getData(csvName, colName):
 
 
 def doLSTM(X_train, y_train):
+    # graph object
     graph = tf.Graph()
+
     train_length = X_train.shape[0]
     with graph.as_default():
         inputs = tf.placeholder(np.float32, shape=(BATCH_SIZE, DAYS, 1))
@@ -72,7 +74,7 @@ def doLSTM(X_train, y_train):
         lstm_layer1_h = tf.zeros(shape=(BATCH_SIZE, HIDDEN_UNITS1))
         layer1_state = tf.contrib.rnn.LSTMStateTuple(c=lstm_layer1_c, h=lstm_layer1_h)
         '''
-        # 第二层state
+        # 第二层state   
         lstm_layer2_c = tf.zeros(shape=(BATCH_SIZE, HIDDEN_UNITS))
         lstm_layer2_h = tf.zeros(shape=(BATCH_SIZE, HIDDEN_UNITS))
         layer2_state = tf.contrib.rnn.LSTMStateTuple(c=lstm_layer2_c, h=lstm_layer2_h)
@@ -133,7 +135,7 @@ def doLSTM(X_train, y_train):
             # X_max = np.max(X_test_label)
             # X_min = np.min(X_test_label)
             # scalar = X_max - X_min
-            # X_test_label = (X_test_label-X_min)/scalar
+            # X_test_label = ~(X_test_label-X_min)/scalar
             _, train_loss, LSTMtuple, _, _ = sess.run(
                 fetches=(optimizer, mse, state_list, h, outputs),
                 feed_dict={
