@@ -3,15 +3,15 @@ import numpy as np
 import pandas as pd
 from numpy import array
 
-DAYS = 25
+DAYS = 7
 BATCH_SIZE = 1
 HIDDEN_UNITS = 128
 LEARNING_RATE = 0.1
 EPOCH = 500
 HIDDEN_UNITS1 = 128
-N_STEPS = 3
+N_STEPS = 7
 N_FEATURES = 1
-TIME_STEPS = 10
+TIME_STEPS = 7
 # ------------- parameters for callback --------------
 CALLBACK = True
 MONITOR = 0.01
@@ -40,10 +40,10 @@ def getData(csvName, colName):
     max_value = np.max(dataset)
     min_value = np.min(dataset)
     scalar = max_value - min_value
-    dataset = list(map(lambda x: (x - min_value) / scalar, dataset))
+    #dataset = list(map(lambda x: (x - min_value) / scalar, dataset))
     X_all, y_all = splitSequence(dataset, DAYS)
     X_all = X_all.reshape((X_all.shape[0], X_all.shape[1], N_FEATURES))
-    train_size = 25
+    train_size = 265
     test_size = len(X_all) - train_size
     X_train = X_all[:train_size]
     y_train = y_all[:train_size]
@@ -52,11 +52,12 @@ def getData(csvName, colName):
     return X_train, y_train, X_test, y_test
 
 
-def doLSTM(X_train, y_train):
+def doLSTM(X_train, y_train, X_test, y_test):
     # graph object
     graph = tf.Graph()
 
     train_length = X_train.shape[0]
+    test_length = X_test.shape[0]
     with graph.as_default():
         inputs = tf.placeholder(np.float32, shape=(BATCH_SIZE, DAYS, 1))
         preds = tf.placeholder(np.float32, shape=(BATCH_SIZE, 1))
@@ -146,9 +147,24 @@ def doLSTM(X_train, y_train):
                 }
             )
 
+
+        for j in range(test_length):
+            # X_max = np.max(X_test_label)
+            # X_min = np.min(X_test_label)
+            # scalar = X_max - X_min
+            # X_test_label = ~(X_test_label-X_min)/scalar
+            _, test_loss, _, _, outputs = sess.run(
+                fetches=(optimizer, mse, state_list, h, outputs),
+                feed_dict={
+                    inputs: X_test[j:j + 1],  # 用25天闭盘价预测26天开盘价
+                    # preds : X_test_label.reshape(1,25,1)
+                    # preds : np.array((np_price[-1]-X_min)/scalar).reshape(1,1)
+                    preds: y_test[j:j + 1].reshape(1, 1)
+                }
+            )
         print("this is ", epoch)
         print(train_loss)
-
+        print(test_loss)
         if CALLBACK and len(train_losses) > 0:
             if train_losses[-1] - train_loss <= MONITOR:
                 patience = patience + 1
@@ -166,6 +182,8 @@ def doLSTM(X_train, y_train):
         CT.append(cts.c.reshape(HIDDEN_UNITS1))
 
 
+
+
 if __name__ == "__main__":
-    X_train, y_train, X_test, y_test = getData("Yingkou_Ningbo_deals.csv", "deals")
-    doLSTM(X_train, y_train)
+    X_train, y_train, X_test, y_test = getData("0226mean-yingkou-qinzhou.csv", "size")
+    doLSTM(X_train, y_train, X_test, y_test)
